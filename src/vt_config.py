@@ -7,6 +7,7 @@ import argparse
 config_desc = \
 {
     'run-exp': ('avail', 'Specify a list of experiments to be performed.', None),
+    'exp-prefix': ('VECTEST', 'Specify a prefix for all experiment names.', None),
 }
 
 default_config = {}

@@ -10,14 +10,9 @@ EXP_CONF = 'exptask.py'
 from vt_config import set_config, get_config
 
 class VecExp(object):
-    def set_expid(self, expid):
-        self.task = {}
-        self.task['name'] = expid
+    def set_actions(self):
+        raise Exception('Subclass should implement add_actions function.')
 
-    def gentask(self):
-        if 'actions' not in self.task:
-            self.task['actions'] = ['echo "TEST EXP"' ]
-        return self.task
 
 def load_exps():
     explist = []
@@ -29,10 +24,17 @@ def load_exps():
             sys.path = oldpath
             match = lambda x: inspect.isclass(x) and x is not VecExp and issubclass(x, VecExp)
             for name, cls in inspect.getmembers(mod, match):
-                expid = os.path.relpath(root, EXP_HOME)
+                expname = '%s/%s'%(os.path.relpath(root, EXP_HOME), cls.__name__)
+                cls.EXPID = '%s:%s'%(get_config('exp-prefix'), expname)
+            for name, cls in inspect.getmembers(mod, match):
+                expname = '%s/%s'%(os.path.relpath(root, EXP_HOME), cls.__name__)
                 expobj = cls()
-                expobj.set_expid(expid)
-                set_config('exp-object', expobj, expid)
+                expobj._task = {}
+                expobj._task['name'] = expname
+                set_config('exp-object', expobj, cls.EXPID)
+                for methodname, method in inspect.getmembers(expobj, predicate=inspect.ismethod):
+                    if methodname.startswith('set_'):
+                        expobj._task[methodname[4:]] = method()
                 explist.append(expobj)
 
     set_config('exp-object-list', explist, None)

@@ -63,3 +63,4 @@ target/
 
 # user defined
 .*.db
+*.swp

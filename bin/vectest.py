@@ -25,10 +25,10 @@ class CustomTaskLoader(TaskLoader):
     """create test tasks on the fly based on cmd-line arguments"""
     DOIT_CONFIG = {
         'verbosity': 2,
-        'continue': True,
         'dep_file': os.path.join(VECTEST_HOME, '.vectest.db'),
         'num_process': 1,
         }
+        #'continue': True,
 
     def gentask_dummy(self):
         task = {}
@@ -37,13 +37,12 @@ class CustomTaskLoader(TaskLoader):
         return task
 
     def _gen_tasks(self):
-        yield self.gentask_dummy()
         for expobj in get_config('exp-object-list'):
-            yield expobj.gentask()
+            yield expobj._task
 
     def load_tasks(self, cmd, params, args):
         """implements loader interface, return (tasks, config)"""
-        return generate_tasks('VECTEST', self._gen_tasks()), self.DOIT_CONFIG
+        return generate_tasks(get_config('exp-prefix'), self._gen_tasks()), self.DOIT_CONFIG
 
 def main():
 
